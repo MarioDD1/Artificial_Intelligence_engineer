@@ -71,7 +71,6 @@ def summarize_dataset(
             if non_null > 0
             else []
         )
-
         is_numeric = bool(ptypes.is_numeric_dtype(s))
         min_val: Optional[float] = None
         max_val: Optional[float] = None
@@ -175,27 +174,59 @@ def compute_quality_flags(summary: DatasetSummary, missing_df: pd.DataFrame) -> 
     Простейшие эвристики «качества» данных:
     - слишком много пропусков;
     - подозрительно мало строк;
-    и т.п.
+    - константные колонки;
+    - высокая кардинальность категориальных признаков.
     """
     flags: Dict[str, Any] = {}
+    
+    # Базовые флаги
     flags["too_few_rows"] = summary.n_rows < 100
     flags["too_many_columns"] = summary.n_cols > 100
-
+    
+    # Пропуски
     max_missing_share = float(missing_df["missing_share"].max()) if not missing_df.empty else 0.0
     flags["max_missing_share"] = max_missing_share
     flags["too_many_missing"] = max_missing_share > 0.5
-
-    # Простейший «скор» качества
+    
+    # НОВЫЕ ЭВРИСТИКИ
+    
+    # 1. Константные колонки (все значения одинаковые)
+    constant_cols = [c.name for c in summary.columns if c.unique == 1 and c.non_null > 0]
+    flags["has_constant_columns"] = len(constant_cols) > 0
+    flags["constant_columns"] = constant_cols[:5]  # Ограничиваем вывод
+    
+    # 2. Высокая кардинальность категориальных признаков
+    # Порог: > 50 уникальных значений ИЛИ > 30% от числа строк
+    high_card_cols = []
+    for c in summary.columns:
+        # Определяем категориальные колонки (не числовые ИЛИ мало уникальных значений)
+        is_categorical = (not c.is_numeric) or (c.unique / summary.n_rows < 0.3)
+        
+        if is_categorical and c.unique > 50 or (c.unique / summary.n_rows > 0.3):
+            high_card_cols.append({
+                'name': c.name,
+                'unique': c.unique,
+                'share': c.unique / summary.n_rows
+            })
+    
+    flags["has_high_cardinality_categoricals"] = len(high_card_cols) > 0
+    flags["high_cardinality_columns"] = high_card_cols[:5]  # Ограничиваем вывод
+    
+    # Расчёт качества
     score = 1.0
-    score -= max_missing_share  # чем больше пропусков, тем хуже
-    if summary.n_rows < 100:
+    score -= max_missing_share
+    
+    if flags["too_few_rows"]:
         score -= 0.2
-    if summary.n_cols > 100:
+    if flags["too_many_columns"]:
         score -= 0.1
-
-    score = max(0.0, min(1.0, score))
-    flags["quality_score"] = score
-
+    if flags["has_constant_columns"]:
+        score -= 0.1
+    if flags["has_high_cardinality_categoricals"]:
+        score -= 0.1
+    
+    flags["quality_score"] = max(0.0, min(1.0, score))
+    
     return flags
 
 

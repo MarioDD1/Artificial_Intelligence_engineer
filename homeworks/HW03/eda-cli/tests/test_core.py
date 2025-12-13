@@ -8,7 +8,8 @@ from eda_cli.core import (
     flatten_summary_for_print,
     missing_table,
     summarize_dataset,
-    top_categories,
+    top_categories, 
+    compute_quality_flags,
 )
 
 
@@ -51,11 +52,23 @@ def test_missing_table_and_quality_flags():
 def test_correlation_and_top_categories():
     df = _sample_df()
     corr = correlation_matrix(df)
-    # корреляция между age и height существует
     assert "age" in corr.columns or corr.empty is False
-
     top_cats = top_categories(df, max_columns=5, top_k=2)
     assert "city" in top_cats
     city_table = top_cats["city"]
     assert "value" in city_table.columns
     assert len(city_table) <= 2
+
+
+def test_new_heuristics():
+    cat_col = ["x"] * 100 + list("yz" * 40) 
+    df = pd.DataFrame({
+        "id": list(range(len(cat_col))),     
+        "label": ["A"] * len(cat_col),     
+        "cat": cat_col,                      
+    })
+    summary = summarize_dataset(df)
+    missing_df = missing_table(df)
+    flags = compute_quality_flags(summary, missing_df)
+    assert flags["has_constant_columns"] is True
+    assert flags["has_high_cardinality_categoricals"] is True
