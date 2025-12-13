@@ -64,12 +64,14 @@ uv run eda-cli report data/example.csv --out-dir reports
 Расширенные параметры команды report
 bash
 # Полный пример с новыми параметрами
+```bash
 uv run eda-cli report data/example.csv \
     --out-dir reports_custom \
     --max-hist-columns 10 \
     --top-k-categories 8 \
     --title "Анализ пользовательских данных" \
     --min-missing-share 0.2
+```
 Новые параметры:
 
 --max-hist-columns – максимальное количество гистограмм для числовых колонок (по умолчанию: 5)
@@ -85,14 +87,17 @@ uv run eda-cli report data/example.csv \
 
 bash
 # Анализ только числовых признаков
+```bash
 uv run eda-cli report data/example.csv --max-hist-columns 3 --out-dir reports_simple
-
+```
 # Детальный анализ категориальных признаков
+```bash
 uv run eda-cli report data/example.csv --top-k-categories 10 --out-dir reports_detailed
-
+```
 # Анализ с акцентом на пропуски
+```bash
 uv run eda-cli report data/example.csv --min-missing-share 0.1 --title "Анализ качества данных"
-
+```
 ## Тесты
 
 ```bash
