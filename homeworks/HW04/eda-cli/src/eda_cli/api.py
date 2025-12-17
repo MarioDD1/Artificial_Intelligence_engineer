@@ -242,3 +242,47 @@ async def quality_from_csv(file: UploadFile = File(...)) -> QualityResponse:
         flags=flags_bool,
         dataset_shape={"n_rows": n_rows, "n_cols": n_cols},
     )
+
+# ---------- Новый эндпоинт quality-flags-from-csv ----------
+
+@app.post(
+    "/quality-flags-from-csv",
+    tags=["quality"],
+    summary="Полный набор флагов качества из CSV-файла",
+)
+async def quality_flags_from_csv(file: UploadFile = File(...)) -> dict:
+    """
+    Возвращает полный словарь флагов качества из CSV-файла.
+    Использует все эвристики из HW03.
+    """
+    
+    # Проверка типа файла
+    if file.content_type not in ("text/csv", "application/vnd.ms-excel", "application/octet-stream"):
+        raise HTTPException(status_code=400, detail="Ожидается CSV-файл")
+    
+    # Чтение CSV
+    try:
+        df = pd.read_csv(file.file)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Ошибка чтения CSV: {exc}")
+    
+    if df.empty:
+        raise HTTPException(status_code=400, detail="CSV-файл пустой")
+    
+    # Получение всех флагов качества через EDA-ядро
+    summary = summarize_dataset(df)
+    missing_df = missing_table(df)
+    flags_all = compute_quality_flags(summary, missing_df)
+    
+    # Преобразование в словарь
+    result = {}
+    for key, value in flags_all.items():
+        # Все значения приводим к простым типам для JSON
+        if isinstance(value, (bool, int, float, str)):
+            result[key] = value
+        elif hasattr(value, '__dict__'):
+            result[key] = str(value)
+        else:
+            result[key] = str(value)
+    
+    return {"flags": result}
