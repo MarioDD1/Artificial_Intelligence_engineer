@@ -64,35 +64,40 @@ uv run eda-cli report data/example.csv --out-dir reports
 Расширенные параметры команды report
 bash
 # Полный пример с новыми параметрами
+```bash
 uv run eda-cli report data/example.csv \
     --out-dir reports_custom \
     --max-hist-columns 10 \
     --top-k-categories 8 \
     --title "Анализ пользовательских данных" \
     --min-missing-share 0.2
+```
 Новые параметры:
 
---max-hist-columns – максимальное количество гистограмм для числовых колонок (по умолчанию: 5)
+`--max-hist-columns `– максимальное количество гистограмм для числовых колонок (по умолчанию: 5)
 
---top-k-categories – количество top-значений для категориальных признаков (по умолчанию: 5)
+`--top-k-categories `– количество top-значений для категориальных признаков (по умолчанию: 5)
 
---title – заголовок отчёта (по умолчанию: без заголовка)
+`--title `– заголовок отчёта (по умолчанию: без заголовка)
 
---min-missing-share – порог доли пропусков для отметки колонки как проблемной (по умолчанию: 0.3)
+`--min-missing-share `– порог доли пропусков для отметки колонки как проблемной (по умолчанию: 0.3)
 
 Примеры использования
 Быстрый анализ с пользовательскими настройками:
 
 bash
 # Анализ только числовых признаков
+```bash
 uv run eda-cli report data/example.csv --max-hist-columns 3 --out-dir reports_simple
-
+```
 # Детальный анализ категориальных признаков
+```bash
 uv run eda-cli report data/example.csv --top-k-categories 10 --out-dir reports_detailed
-
+```
 # Анализ с акцентом на пропуски
+```bash
 uv run eda-cli report data/example.csv --min-missing-share 0.1 --title "Анализ качества данных"
-
+```
 ## Тесты
 
 ```bash
