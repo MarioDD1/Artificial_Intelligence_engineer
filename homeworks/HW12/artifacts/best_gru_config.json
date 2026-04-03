@@ -1,31 +1,22 @@
 {
-  "window_size": 48,
-  "batch_size": 64,
+  "model": "GRU",
+  "input_size": 1,
   "hidden_size": 64,
-  "num_layers": 1,
-  "dropout": 0.0,
+  "num_layers": 2,
+  "dropout": 0.2,
+  "window_size": 24,
+  "horizon": 1,
+  "batch_size": 64,
   "lr": 0.001,
-  "epochs": 30,
-  "patience": 8,
+  "epochs_trained": 20,
+  "best_val_loss_mse": 0.148261,
+  "val_mae": 5.5328,
+  "val_rmse": 7.1163,
+  "val_mape": 3.73,
+  "test_mae": 6.8562,
+  "test_rmse": 8.5314,
+  "test_mape": 4.41,
+  "scaler": "StandardScaler",
   "seed": 42,
-  "device_used": "cpu",
-  "best_epoch": 18,
-  "split_summary": {
-    "train_rows": 3024,
-    "val_rows": 648,
-    "test_rows": 648,
-    "train_range": [
-      "2025-01-01 00:00:00",
-      "2025-05-06 23:00:00"
-    ],
-    "val_range": [
-      "2025-05-07 00:00:00",
-      "2025-06-02 23:00:00"
-    ],
-    "test_range": [
-      "2025-06-03 00:00:00",
-      "2025-06-29 23:00:00"
-    ]
-  },
-  "scaler": "StandardScaler(train target only)"
+  "dataset": "S12-hw-dataset.csv"
 }
